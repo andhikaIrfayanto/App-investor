@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<title>Aplikasi Manajemen Restoran dan Investor</title>
+<style>
+  /* Reset */
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 16px;
+    background: #f7f9fc;
+    color: #333;
+    max-width: 350px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  h1, h2 {
+    color: #2c3e50;
+    margin-bottom: 12px;
+    font-weight: 700;
+  }
+  form {
+    background: white;
+    padding: 16px;
+    margin-bottom: 24px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgb(0 0 0 / 0.1);
+  }
+  label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+  }
+  input[type="text"], input[type="number"], select {
+    width: 100%;
+    padding: 10px 12px;
+    margin-bottom: 14px;
+    border: 1.5px solid #bdc3c7;
+    border-radius: 5px;
+    font-size: 14px;
+    transition: border-color 0.2s ease;
+  }
+  input[type="text"]:focus, input[type="number"]:focus, select:focus {
+    outline: none;
+    border-color: #3498db;
+  }
+  button {
+    background-color: #3498db;
+    border: none;
+    color: white;
+    padding: 12px 20px;
+    font-size: 16px;
+    font-weight: 700;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 100%;
+    transition: background-color 0.3s ease;
+  }
+  button:hover {
+    background-color: #2980b9;
+  }
+  .error {
+    color: #e74c3c;
+    font-size: 13px;
+    margin-top: -10px;
+    margin-bottom: 10px;
+  }
+  .list-section {
+    margin-bottom: 24px;
+  }
+  .list-section h3 {
+    margin-bottom: 8px;
+    color: #34495e;
+  }
+  ul {
+    padding-left: 20px;
+    margin-top: 6px;
+  }
+  li {
+    margin-bottom: 6px;
+  }
+  
+  /* Dashboard Styles */
+  .dashboard {
+    background: white;
+    padding: 16px;
+    margin-bottom: 24px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgb(0 0 0 / 0.1);
+  }
+  .dashboard h2 {
+    margin-top: 0;
+  }
+  .dashboard-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+  .dashboard-table th, .dashboard-table td {
+    padding: 8px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+  }
+  .dashboard-table th {
+    background-color: #f2f6fa;
+    font-weight: 600;
+  }
+  .dashboard-table tr:hover {
+    background-color: #f9f9f9;
+  }
+  .progress-bar {
+    height: 20px;
+    background-color: #ecf0f1;
+    border-radius: 4px;
+    margin-top: 4px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background-color: #3498db;
+    width: 0%;
+    transition: width 0.3s ease;
+  }
+  
+  /* Responsive adjustments for smaller screens */
+  @media (max-width: 400px) {
+    body {
+      padding: 12px;
+    }
+    button {
+      font-size: 14px;
+      padding: 10px 16px;
+    }
+    .dashboard-table {
+      font-size: 12px;
+    }
+    .dashboard-table th, .dashboard-table td {
+      padding: 6px 4px;
+    }
+  }
+</style>
+</head>
+<body>
+  <h1>Input Restoran Baru</h1>
+  <form id="restoForm" novalidate>
+    <label for="restoName">Nama Restoran</label>
+    <input type="text" id="restoName" name="restoName" required placeholder="Masukkan nama restoran" autocomplete="off" />
+    <div id="restoNameError" class="error" aria-live="polite"></div>
+
+    <label for="restoArea">Area Restoran</label>
+    <input type="text" id="restoArea" name="restoArea" required placeholder="Masukkan area restoran" autocomplete="off" />
+    <div id="restoAreaError" class="error" aria-live="polite"></div>
+
+    <label for="restoBudget">Rincian Anggaran (Rp)</label>
+    <input type="text" id="restoBudget" name="restoBudget" required placeholder="Contoh: 1.000.000" autocomplete="off" />
+    <div id="restoBudgetError" class="error" aria-live="polite"></div>
+
+    <button type="submit">Tambah Restoran</button>
+  </form>
+
+  <section class="list-section" aria-label="Daftar Restoran">
+    <h2>Daftar Restoran</h2>
+    <ul id="restoList" aria-live="polite" aria-relevant="additions"></ul>
+  </section>
+
+  <h1>Input Investor Baru</h1>
+  <form id="investorForm" novalidate>
+    <label for="selectResto">Pilih Restoran</label>
+    <select id="selectResto" name="selectResto" required>
+      <option value="">-- Pilih restoran --</option>
+    </select>
+    <div id="selectRestoError" class="error" aria-live="polite"></div>
+
+    <label for="investorName">Nama Investor</label>
+    <input type="text" id="investorName" name="investorName" required placeholder="Masukkan nama investor" autocomplete="off" />
+    <div id="investorNameError" class="error" aria-live="polite"></div>
+
+    <label for="investAmount">Jumlah Investasi (Rp)</label>
+    <input type="text" id="investAmount" name="investAmount" required placeholder="Contoh: 500.000" autocomplete="off" />
+    <div id="investAmountError" class="error" aria-live="polite"></div>
+
+    <label for="investPercent">Persentase Investasi</label>
+    <input type="text" id="investPercent" name="investPercent" disabled placeholder="Persentase otomatis" />
+    <div id="investPercentError" class="error" aria-live="polite"></div>
+
+    <button type="submit">Tambah Investor</button>
+  </form>
+
+  <section class="list-section" aria-label="Daftar Investor">
+    <h2>Daftar Investor</h2>
+    <ul id="investorList" aria-live="polite" aria-relevant="additions"></ul>
+  </section>
+
+  <!-- New Dashboard Section -->
+  <section class="dashboard">
+    <h2>Dashboard Investasi Restoran</h2>
+    <table class="dashboard-table">
+      <thead>
+        <tr>
+          <th>Nama Resto</th>
+          <th>Anggaran</th>
+          <th>Investor</th>
+          <th>Investasi</th>
+          <th>Persentase</th>
+        </tr>
+      </thead>
+      <tbody id="dashboardTable">
+        <!-- Will be populated by JavaScript -->
+      </tbody>
+    </table>
+  </section>
+
+<script>
+  (() => {
+    const restoForm = document.getElementById('restoForm');
+    const investorForm = document.getElementById('investorForm');
+    const restoListEl = document.getElementById('restoList');
+    const investorListEl = document.getElementById('investorList');
+    const selectResto = document.getElementById('selectResto');
+    const dashboardTable = document.getElementById('dashboardTable');
+
+    // Error elements
+    const restoNameError = document.getElementById('restoNameError');
+    const restoAreaError = document.getElementById('restoAreaError');
+    const restoBudgetError = document.getElementById('restoBudgetError');
+    const selectRestoError = document.getElementById('selectRestoError');
+    const investorNameError = document.getElementById('investorNameError');
+    const investAmountError = document.getElementById('investAmountError');
+    const investPercentError = document.getElementById('investPercentError');
+
+    // Data storage
+    let restos = [];
+    let investors = [];
+
+    // Helper: Validate alphabet only (allow space, letters only)
+    function isAlphabet(str) {
+      return /^[a-zA-Z\s]+$/.test(str.trim());
+    }
+
+    // Helper: Validate rupiah format number string (accept dots for thousands and optional commas ignored)
+    function parseRupiah(str) {
+      // Remove non digits except .
+      let val = str.replace(/[^0-9]/g, '');
+      // parse to int
+      return Number(val);
+    }
+
+    // Format number as rupiah string (e.g. 1000000 -> 1.000.000)
+    function formatRupiah(num) {
+      if (isNaN(num) || num <= 0) return "";
+      return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    }
+
+    // Clear error messages
+    function clearErrors() {
+      restoNameError.textContent = '';
+      restoAreaError.textContent = '';
+      restoBudgetError.textContent = '';
+      selectRestoError.textContent = '';
+      investorNameError.textContent = '';
+      investAmountError.textContent = '';
+      investPercentError.textContent = '';
+    }
+
+    // Render restaurant list
+    function renderRestoList() {
+      restoListEl.innerHTML = '';
+      selectResto.innerHTML = '<option value="">-- Pilih restoran --</option>';
+      restos.forEach((resto, idx) => {
+        const li = document.createElement('li');
+        li.textContent = `${resto.name} - Area: ${resto.area} - Anggaran: Rp ${formatRupiah(resto.budget)}`;
+        restoListEl.appendChild(li);
+
+        const option = document.createElement('option');
+        option.value = idx;
+        option.textContent = resto.name;
+        selectResto.appendChild(option);
+      });
+      
+      // Update dashboard whenever restaurant list changes
+      renderDashboard();
+    }
+
+    // Render investor list with details
+    function renderInvestorList() {
+      investorListEl.innerHTML = '';
+      if (investors.length === 0) {
+        investorListEl.textContent = 'Belum ada investor yang dimasukkan.';
+      } else {
+        investors.forEach(inv => {
+          const li = document.createElement('li');
+          li.textContent = `Resto: ${inv.restoName} - Investor: ${inv.name} - Investasi: Rp ${formatRupiah(inv.amount)} - Persentase: ${inv.percent.toFixed(2)}%`;
+          investorListEl.appendChild(li);
+        });
+      }
+      
+      // Update dashboard whenever investor list changes
+      renderDashboard();
+    }
+
+    // Render dashboard table
+    function renderDashboard() {
+      dashboardTable.innerHTML = '';
+      
+      if (restos.length === 0) {
+        const row = document.createElement('tr');
+        const cell = document.createElement('td');
+        cell.colSpan = 5;
+        cell.textContent = 'Belum ada restoran yang dimasukkan.';
+        cell.style.textAlign = 'center';
+        cell.style.padding = '16px';
+        row.appendChild(cell);
+        dashboardTable.appendChild(row);
+        return;
+      }
+      
+      // Group investors by restaurant
+      const investorsByResto = {};
+      investors.forEach(inv => {
+        if (!investorsByResto[inv.restoName]) {
+          investorsByResto[inv.restoName] = [];
+        }
+        investorsByResto[inv.restoName].push(inv);
+      });
+      
+      // Create rows for each restaurant
+      restos.forEach(resto => {
+        const row = document.createElement('tr');
+        
+        // Nama Resto
+        const nameCell = document.createElement('td');
+        nameCell.textContent = resto.name;
+        row.appendChild(nameCell);
+        
+        // Anggaran
+        const budgetCell = document.createElement('td');
+        budgetCell.textContent = `Rp ${formatRupiah(resto.budget)}`;
+        row.appendChild(budgetCell);
+        
+        // Check if there are investors for this restaurant
+        const restoInvestors = investorsByResto[resto.name] || [];
+        
+        if (restoInvestors.length > 0) {
+          // Investor names (comma separated)
+          const investorNames = restoInvestors.map(inv => inv.name).join(', ');
+          const investorCell = document.createElement('td');
+          investorCell.textContent = investorNames;
+          row.appendChild(investorCell);
+          
+          // Total investment
+          const totalInvestment = restoInvestors.reduce((sum, inv) => sum + inv.amount, 0);
+          const investmentCell = document.createElement('td');
+          investmentCell.textContent = `Rp ${formatRupiah(totalInvestment)}`;
+          row.appendChild(investmentCell);
+          
+          // Percentage
+          const percentage = (totalInvestment / resto.budget) * 100;
+          const percentCell = document.createElement('td');
+          percentCell.innerHTML = `
+            ${percentage.toFixed(2)}%
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: ${Math.min(percentage, 100)}%"></div>
+            </div>
+          `;
+          row.appendChild(percentCell);
+        } else {
+          // No investors for this restaurant
+          const emptyCell1 = document.createElement('td');
+          emptyCell1.textContent = '-';
+          row.appendChild(emptyCell1);
+          
+          const emptyCell2 = document.createElement('td');
+          emptyCell2.textContent = 'Rp 0';
+          row.appendChild(emptyCell2);
+          
+          const emptyCell3 = document.createElement('td');
+          emptyCell3.textContent = '0%';
+          row.appendChild(emptyCell3);
+        }
+        
+        dashboardTable.appendChild(row);
+      });
+    }
+
+    // Validate and add a restaurant
+    restoForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      clearErrors();
+
+      const name = restoForm.restoName.value.trim();
+      const area = restoForm.restoArea.value.trim();
+      const budgetStr = restoForm.restoBudget.value.trim();
+
+      let valid = true;
+
+      if (!name) {
+        restoNameError.textContent = 'Nama restoran harus diisi.';
+        valid = false;
+      } else if (!isAlphabet(name)) {
+        restoNameError.textContent = 'Nama restoran harus berupa huruf alphabet dan spasi saja.';
+        valid = false;
+      }
+
+      if (!area) {
+        restoAreaError.textContent = 'Area restoran harus diisi.';
+        valid = false;
+      } else if (!isAlphabet(area)) {
+        restoAreaError.textContent = 'Area restoran harus berupa huruf alphabet dan spasi saja.';
+        valid = false;
+      }
+
+      const budget = parseRupiah(budgetStr);
+      if (!budget || budget <= 0) {
+        restoBudgetError.textContent = 'Rincian anggaran harus berupa angka rupiah yang valid dan lebih dari 0.';
+        valid = false;
+      }
+
+      if (!valid) return;
+
+      // Add restaurant
+      restos.push({ name, area, budget });
+      renderRestoList();
+
+      // Reset form
+      restoForm.reset();
+    });
+
+    // Automatically update investment percentage based on input and selected restaurant
+    function updateInvestPercent() {
+      investPercentError.textContent = '';
+      investPercent.value = '';
+      const restoIndex = selectResto.value;
+      if (restoIndex === '') {
+        investPercent.disabled = true;
+        return;
+      }
+      const resto = restos[restoIndex];
+      if (!resto) {
+        investPercent.disabled = true;
+        return;
+      }
+      const investAmountVal = parseRupiah(investAmount.value.trim());
+      if (!investAmountVal || investAmountVal <= 0) {
+        investPercent.disabled = true;
+        return;
+      }
+      investPercent.disabled = false;
+      const percent = (investAmountVal / resto.budget) * 100;
+      investPercent.value = percent.toFixed(2) + ' %';
+    }
+
+    selectResto.addEventListener('change', () => {
+      updateInvestPercent();
+      selectRestoError.textContent = '';
+    });
+
+    const investAmount = document.getElementById('investAmount');
+    investAmount.addEventListener('input', () => {
+      // Format input as rupiah dynamically
+      let val = investAmount.value.replace(/[^0-9]/g, '');
+      if (val) {
+        investAmount.value = formatRupiah(Number(val));
+      } else {
+        investAmount.value = '';
+      }
+      updateInvestPercent();
+      investAmountError.textContent = '';
+    });
+
+    // Validate and add investor
+    investorForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      clearErrors();
+
+      const restoIdx = selectResto.value;
+      const investorNameVal = investorForm.investorName.value.trim();
+      const investAmountStr = investAmount.value.trim();
+
+      let valid = true;
+
+      if (restoIdx === '') {
+        selectRestoError.textContent = 'Harap pilih restoran.';
+        valid = false;
+      }
+      if (!investorNameVal) {
+        investorNameError.textContent = 'Nama investor harus diisi.';
+        valid = false;
+      } else if (!isAlphabet(investorNameVal)) {
+        investorNameError.textContent = 'Nama investor harus berupa huruf alphabet dan spasi saja.';
+        valid = false;
+      }
+
+      const investNum = parseRupiah(investAmountStr);
+      if (!investNum || investNum <= 0) {
+        investAmountError.textContent = 'Jumlah investasi harus berupa angka rupiah yang valid dan lebih dari 0.';
+        valid = false;
+      }
+
+      if (!valid) return;
+
+      const resto = restos[restoIdx];
+      if (!resto) {
+        selectRestoError.textContent = 'Restoran tidak ditemukan.';
+        return;
+      }
+      const percent = (investNum / resto.budget) * 100;
+
+      // Add investor record
+      investors.push({
+        restoName: resto.name,
+        name: investorNameVal,
+        amount: investNum,
+        percent: percent
+      });
+      renderInvestorList();
+
+      // Reset investor form
+      investorForm.reset();
+      investPercent.value = '';
+      investPercent.disabled = true;
+    });
+
+    // Format rupiah input for restaurant budget dynamically
+    const restoBudgetInput = document.getElementById('restoBudget');
+    restoBudgetInput.addEventListener('input', () => {
+      let val = restoBudgetInput.value.replace(/[^0-9]/g, '');
+      if (val) {
+        restoBudgetInput.value = formatRupiah(Number(val));
+      } else {
+        restoBudgetInput.value = '';
+      }
+      restoBudgetError.textContent = '';
+    });
+
+    renderRestoList();
+    renderInvestorList();
+    renderDashboard();
+  })();
+</script>
+</body>
+</html>
